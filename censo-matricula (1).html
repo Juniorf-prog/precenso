@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Pré-Censo — Portal de Matrícula</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy: #0d1b3e;
+  --navy2: #152249;
+  --navy3: #1e2f5a;
+  --gold: #c9a84c;
+  --gold-light: #e2c47a;
+  --gold-pale: #fdf6e3;
+  --gold-dim: rgba(201,168,76,0.15);
+  --white: #ffffff;
+  --cream: #fafbff;
+  --text: #0d1b3e;
+  --text-mid: #4a5a8a;
+  --text-soft: #8a9ac0;
+  --border: rgba(13,27,62,0.1);
+  --border-mid: rgba(13,27,62,0.18);
+  --shadow-sm: 0 2px 12px rgba(13,27,62,0.07);
+  --shadow: 0 8px 32px rgba(13,27,62,0.12);
+  --shadow-lg: 0 20px 60px rgba(13,27,62,0.18);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --font-display: 'Playfair Display', serif;
+  --font-body: 'Plus Jakarta Sans', sans-serif;
+  --tr: all 0.22s cubic-bezier(0.4,0,0.2,1);
+  --success: #1a8c5a;
+  --error: #c0392b;
+}
+*,*::before,*::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: var(--font-body); background: var(--cream); color: var(--text); -webkit-font-smoothing: antialiased; min-height: 100vh; }
+button { font-family: var(--font-body); cursor: pointer; }
+input, select, textarea { font-family: var(--font-body); }
+.hidden { display: none !important; }
+
+/* HEADER */
+.header {
+  background: var(--navy);
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 4px 24px rgba(13,27,62,0.3);
+}
+.header-brand { display: flex; align-items: center; gap: 12px; }
+.header-icon { width: 36px; height: 36px; background: linear-gradient(135deg, var(--gold), var(--gold-light)); border-radius: 9px; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; }
+.header-name { font-family: var(--font-display); font-size: 1.1rem; color: white; }
+.header-sub { font-size: 0.68rem; color: rgba(255,255,255,0.5); margin-top: 1px; }
+.header-badge { background: var(--gold-dim); border: 1px solid rgba(201,168,76,0.3); color: var(--gold-light); padding: 5px 12px; border-radius: 100px; font-size: 0.72rem; font-weight: 600; }
+
+/* HERO */
+.hero {
+  background: linear-gradient(135deg, var(--navy) 0%, var(--navy3) 60%, #1a3a6e 100%);
+  padding: 48px 24px 56px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; right: -60px;
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(201,168,76,0.15) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -40px; left: -40px;
+  width: 200px; height: 200px;
+  background: radial-gradient(circle, rgba(201,168,76,0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold-light);
+  padding: 6px 16px;
+  border-radius: 100px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-bottom: 18px;
+  letter-spacing: 0.5px;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 2.8rem);
+  color: white;
+  margin-bottom: 12px;
+  line-height: 1.2;
+}
+.hero h1 span { color: var(--gold-light); }
+.hero p { color: rgba(255,255,255,0.65); font-size: 0.95rem; max-width: 440px; margin: 0 auto 28px; line-height: 1.7; }
+.hero-escola {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  background: rgba(255,255,255,0.08);
+  border: 1px solid rgba(255,255,255,0.15);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 100px;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+/* MAIN */
+.main { max-width: 620px; margin: 0 auto; padding: 32px 16px 80px; }
+
+/* STEPS */
+.steps-wrap { margin-bottom: 32px; }
+.steps { display: flex; align-items: center; justify-content: center; gap: 0; }
+.step-item { display: flex; flex-direction: column; align-items: center; position: relative; }
+.step-dot {
+  width: 36px; height: 36px; border-radius: 50%;
+  border: 2px solid var(--border-mid);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.78rem; font-weight: 700; color: var(--text-soft);
+  background: white; transition: var(--tr); flex-shrink: 0;
+}
+.step-item.active .step-dot { background: var(--navy); border-color: var(--navy); color: white; box-shadow: 0 4px 14px rgba(13,27,62,0.3); }
+.step-item.done .step-dot { background: var(--gold); border-color: var(--gold); color: white; }
+.step-label { font-size: 0.65rem; color: var(--text-soft); margin-top: 6px; font-weight: 600; text-align: center; white-space: nowrap; }
+.step-item.active .step-label { color: var(--navy); }
+.step-item.done .step-label { color: var(--gold); }
+.step-line { width: 36px; height: 2px; background: var(--border); margin-bottom: 22px; flex-shrink: 0; transition: var(--tr); }
+.step-line.done { background: var(--gold); }
+@media(max-width:480px) { .step-line { width: 20px; } .step-label { display: none; } }
+
+/* CARD */
+.form-card {
+  background: white;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  animation: fadeUp 0.4s ease;
+}
+@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+.form-card-head {
+  background: linear-gradient(135deg, var(--navy), var(--navy3));
+  padding: 22px 26px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.form-card-icon { font-size: 1.6rem; }
+.form-card-title { font-family: var(--font-display); font-size: 1.2rem; color: white; }
+.form-card-sub { font-size: 0.78rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
+.form-card-body { padding: 26px; }
+
+/* FORM */
+.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+.form-row.single { grid-template-columns: 1fr; }
+.form-row.thirds { grid-template-columns: 1fr 1fr 1fr; }
+.form-group { display: flex; flex-direction: column; gap: 6px; }
+.form-group.full { grid-column: 1/-1; }
+.form-label {
+  font-size: 0.71rem; font-weight: 700; color: var(--text-mid);
+  text-transform: uppercase; letter-spacing: 0.6px;
+  display: flex; align-items: center; gap: 5px;
+}
+.form-label .required { color: var(--error); }
+.form-input {
+  padding: 12px 14px;
+  border: 1.5px solid var(--border-mid);
+  border-radius: var(--radius-sm);
+  font-size: 0.9rem; color: var(--text);
+  background: var(--cream); outline: none;
+  transition: var(--tr); width: 100%;
+}
+.form-input:focus { border-color: var(--navy); background: white; box-shadow: 0 0 0 3px rgba(13,27,62,0.08); }
+.form-input.error { border-color: var(--error); background: #fff5f5; }
+.form-input.success { border-color: var(--success); }
+.form-input::placeholder { color: var(--text-soft); }
+select.form-input { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; padding-right: 34px; background-color: var(--cream); }
+.form-hint { font-size: 0.72rem; color: var(--text-soft); margin-top: 4px; }
+.form-error { font-size: 0.72rem; color: var(--error); margin-top: 4px; display: none; }
+.form-error.show { display: block; }
+@media(max-width:500px) { .form-row, .form-row.thirds { grid-template-columns: 1fr; } }
+
+/* TOGGLE */
+.toggle-wrap { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; background: var(--cream); border-radius: var(--radius-sm); border: 1.5px solid var(--border-mid); cursor: pointer; transition: var(--tr); }
+.toggle-wrap:hover { border-color: var(--navy); }
+.toggle-label { font-size: 0.88rem; font-weight: 600; color: var(--text); }
+.toggle-sub { font-size: 0.73rem; color: var(--text-soft); margin-top: 2px; }
+.toggle { width: 44px; height: 24px; background: var(--border-mid); border-radius: 100px; position: relative; transition: background 0.25s; flex-shrink: 0; }
+.toggle::after { content: ''; position: absolute; width: 18px; height: 18px; background: white; border-radius: 50%; top: 3px; left: 3px; transition: transform 0.25s; box-shadow: 0 1px 4px rgba(0,0,0,0.2); }
+.toggle.on { background: var(--navy); }
+.toggle.on::after { transform: translateX(20px); }
+
+/* DEFICIENCIA OPTIONS */
+.def-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+.def-item { display: flex; align-items: center; gap: 8px; padding: 10px 12px; border: 1.5px solid var(--border-mid); border-radius: var(--radius-sm); cursor: pointer; transition: var(--tr); font-size: 0.82rem; font-weight: 500; }
+.def-item:hover { border-color: var(--navy); background: var(--cream); }
+.def-item.selected { border-color: var(--navy); background: rgba(13,27,62,0.05); color: var(--navy); font-weight: 700; }
+.def-check { width: 18px; height: 18px; border-radius: 4px; border: 2px solid var(--border-mid); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: var(--tr); font-size: 0.65rem; }
+.def-item.selected .def-check { background: var(--navy); border-color: var(--navy); color: white; }
+@media(max-width:400px) { .def-grid { grid-template-columns: 1fr; } }
+
+/* PROGRESS */
+.progress-bar { height: 4px; background: var(--border); border-radius: 2px; margin-bottom: 24px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--navy), var(--gold)); border-radius: 2px; transition: width 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+/* BUTTONS */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 13px 28px; border-radius: 100px; border: none; font-family: var(--font-body); font-size: 0.9rem; font-weight: 700; cursor: pointer; transition: var(--tr); white-space: nowrap; }
+.btn:active { transform: scale(0.97); }
+.btn-navy { background: linear-gradient(135deg, var(--navy), var(--navy3)); color: white; box-shadow: 0 4px 16px rgba(13,27,62,0.3); }
+.btn-navy:hover { box-shadow: 0 6px 24px rgba(13,27,62,0.45); transform: translateY(-1px); }
+.btn-gold { background: linear-gradient(135deg, var(--gold), var(--gold-light)); color: var(--navy); box-shadow: 0 4px 16px rgba(201,168,76,0.35); font-weight: 800; }
+.btn-gold:hover { box-shadow: 0 6px 24px rgba(201,168,76,0.5); transform: translateY(-1px); }
+.btn-outline { background: transparent; border: 1.5px solid var(--border-mid); color: var(--text-mid); }
+.btn-outline:hover { border-color: var(--navy); color: var(--navy); }
+.btn[disabled] { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+.w-full { width: 100%; }
+.btn-row { display: flex; gap: 12px; justify-content: space-between; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border); }
+
+/* SUCCESS */
+.success-wrap { text-align: center; padding: 48px 24px; animation: fadeUp 0.5s ease; }
+.success-icon { font-size: 5rem; margin-bottom: 16px; display: block; animation: bounceIn 0.6s ease; }
+@keyframes bounceIn { 0%{transform:scale(0)} 60%{transform:scale(1.2)} 100%{transform:scale(1)} }
+.success-title { font-family: var(--font-display); font-size: 2rem; color: var(--navy); margin-bottom: 10px; }
+.success-sub { color: var(--text-mid); font-size: 0.95rem; line-height: 1.7; margin-bottom: 28px; }
+.success-card { background: var(--gold-pale); border: 1px solid rgba(201,168,76,0.3); border-radius: var(--radius); padding: 20px; margin: 0 auto 24px; max-width: 400px; text-align: left; }
+.success-row { display: flex; justify-content: space-between; padding: 7px 0; font-size: 0.88rem; border-bottom: 1px solid rgba(201,168,76,0.15); }
+.success-row:last-child { border-bottom: none; }
+.success-row strong { color: var(--navy); }
+
+/* TOAST */
+.toast-wrap { position: fixed; bottom: 24px; right: 16px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+.toast { background: white; border-radius: var(--radius-sm); padding: 13px 18px; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 10px; min-width: 220px; pointer-events: all; border-left: 4px solid var(--navy); font-size: 0.85rem; font-weight: 600; animation: toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1); }
+@keyframes toastIn { from{transform:translateX(120%);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes toastOut { to{transform:translateX(120%);opacity:0} }
+.toast.success { border-left-color: var(--success); }
+.toast.error { border-left-color: var(--error); }
+.toast.warning { border-left-color: var(--gold); }
+
+/* LOADING */
+.loading-overlay { position: fixed; inset: 0; z-index: 9999; background: rgba(13,27,62,0.6); backdrop-filter: blur(6px); display: flex; align-items: center; justify-content: center; }
+.loading-card { background: white; border-radius: var(--radius); padding: 32px 40px; text-align: center; box-shadow: var(--shadow-lg); }
+.spinner { width: 40px; height: 40px; border: 3px solid var(--border); border-top-color: var(--navy); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 14px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* BLOQUEADO */
+.blocked-wrap { min-height: 80vh; display: flex; align-items: center; justify-content: center; padding: 24px; }
+.blocked-card { background: white; border-radius: var(--radius); padding: 48px 36px; max-width: 420px; width: 100%; text-align: center; box-shadow: var(--shadow-lg); border-top: 4px solid var(--error); }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="header-brand">
+    <div class="header-icon">📋</div>
+    <div>
+      <div class="header-name" id="hEscolaNome">Pré-Censo Escolar</div>
+      <div class="header-sub">Portal de Matrícula Online</div>
+    </div>
+  </div>
+  <div class="header-badge">Censo 2026</div>
+</header>
+
+<!-- BLOQUEADO -->
+<div id="blockedScreen" class="hidden">
+  <div class="blocked-wrap">
+    <div class="blocked-card">
+      <div style="font-size:3.5rem;margin-bottom:16px">🔒</div>
+      <h2 style="font-family:var(--font-display);font-size:1.6rem;color:var(--navy);margin-bottom:10px">Acesso Suspenso</h2>
+      <p style="color:var(--text-mid);font-size:0.9rem;line-height:1.7;margin-bottom:24px">O portal de matrícula desta escola está temporariamente indisponível. Entre em contato com a secretaria para mais informações.</p>
+      <a id="blockedWA" href="#" target="_blank" class="btn btn-gold w-full" style="text-decoration:none;justify-content:center">💬 Falar com a Secretaria</a>
+    </div>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="loadingScreen" class="loading-overlay">
+  <div class="loading-card">
+    <div class="spinner"></div>
+    <div style="font-family:var(--font-display);font-size:1rem;color:var(--navy)">Carregando...</div>
+  </div>
+</div>
+
+<!-- PORTAL -->
+<div id="portalScreen" class="hidden">
+
+  <section class="hero">
+    <div class="hero-tag">📋 Censo Escolar 2026</div>
+    <h1>Formulário de <span>Matrícula</span><br>e Dados do Censo</h1>
+    <p>Preencha os dados do seu filho com atenção. Essas informações são obrigatórias para o Censo Escolar do MEC.</p>
+    <div class="hero-escola" id="heroEscola">🏫 Carregando...</div>
+  </section>
+
+  <div class="main">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill" style="width:25%"></div></div>
+
+    <!-- STEPS NAV -->
+    <div class="steps-wrap">
+      <div class="steps">
+        <div class="step-item active" id="si1"><div class="step-dot">1</div><div class="step-label">Aluno</div></div>
+        <div class="step-line" id="sl1"></div>
+        <div class="step-item" id="si2"><div class="step-dot">2</div><div class="step-label">Censo</div></div>
+        <div class="step-line" id="sl2"></div>
+        <div class="step-item" id="si3"><div class="step-dot">3</div><div class="step-label">Necessidades</div></div>
+        <div class="step-line" id="sl3"></div>
+        <div class="step-item" id="si4"><div class="step-dot">4</div><div class="step-label">Responsável</div></div>
+      </div>
+    </div>
+
+    <!-- STEP 1 — DADOS DO ALUNO -->
+    <div id="step1">
+      <div class="form-card">
+        <div class="form-card-head">
+          <div class="form-card-icon">👤</div>
+          <div>
+            <div class="form-card-title">Dados do Aluno</div>
+            <div class="form-card-sub">Informações básicas de identificação</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label">Nome Completo <span class="required">*</span></label>
+              <input class="form-input" id="f_nome" placeholder="Nome completo do aluno (em maiúsculas)" oninput="this.value=this.value.toUpperCase()" />
+              <div class="form-error" id="err_nome">Nome é obrigatório</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">Data de Nascimento <span class="required">*</span></label>
+              <input class="form-input" id="f_nascimento" type="date" />
+              <div class="form-error" id="err_nascimento">Data é obrigatória</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Sexo <span class="required">*</span></label>
+              <select class="form-input" id="f_sexo">
+                <option value="">Selecione...</option>
+                <option value="1">Masculino</option>
+                <option value="2">Feminino</option>
+              </select>
+              <div class="form-error" id="err_sexo">Selecione o sexo</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CEP</label>
+              <input class="form-input" id="f_cep" placeholder="00000-000" maxlength="9" oninput="maskCEP(this)" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Zona</label>
+              <select class="form-input" id="f_zona">
+                <option value="">Selecione...</option>
+                <option value="urbana">Urbana</option>
+                <option value="rural">Rural</option>
+              </select>
+            </div>
+          </div>
+          <div class="btn-row">
+            <div></div>
+            <button class="btn btn-navy" onclick="goTo(2)">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2 — DADOS DO CENSO -->
+    <div id="step2" class="hidden">
+      <div class="form-card">
+        <div class="form-card-head">
+          <div class="form-card-icon">📊</div>
+          <div>
+            <div class="form-card-title">Dados do Censo</div>
+            <div class="form-card-sub">Campos obrigatórios pelo MEC</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">CPF do Aluno <span class="required">*</span></label>
+              <input class="form-input" id="f_cpf" placeholder="000.000.000-00" maxlength="14" oninput="maskCPF(this)" />
+              <div class="form-hint">Se não tiver, deixe em branco (será registrado como pendente)</div>
+              <div class="form-error" id="err_cpf">CPF inválido</div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">NIS / Bolsa Família</label>
+              <input class="form-input" id="f_nis" placeholder="00000000000" maxlength="11" oninput="this.value=this.value.replace(/\D/g,'')" />
+              <div class="form-hint">11 dígitos, somente números</div>
+            </div>
+          </div>
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label">Cor/Raça <span class="required">*</span></label>
+              <select class="form-input" id="f_raca">
+                <option value="">Selecione (obrigatório pelo MEC)</option>
+                <option value="1">1 — Branca</option>
+                <option value="2">2 — Preta</option>
+                <option value="3">3 — Parda</option>
+                <option value="4">4 — Amarela</option>
+                <option value="5">5 — Indígena</option>
+              </select>
+              <div class="form-hint">O MEC não aceita "Não declarado" — escolha a que melhor representa</div>
+              <div class="form-error" id="err_raca">Cor/Raça é obrigatório pelo MEC</div>
+            </div>
+          </div>
+          <div class="btn-row">
+            <button class="btn btn-outline" onclick="goTo(1)">← Voltar</button>
+            <button class="btn btn-navy" onclick="goTo(3)">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 3 — NECESSIDADES ESPECIAIS -->
+    <div id="step3" class="hidden">
+      <div class="form-card">
+        <div class="form-card-head">
+          <div class="form-card-icon">♿</div>
+          <div>
+            <div class="form-card-title">Necessidades e Transporte</div>
+            <div class="form-card-sub">Informações de acessibilidade e logística</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="form-row single" style="margin-bottom:14px">
+            <div class="toggle-wrap" onclick="togglePCD()">
+              <div>
+                <div class="toggle-label">Possui Deficiência (PcD)?</div>
+                <div class="toggle-sub">Marque se o aluno possui algum tipo de deficiência</div>
+              </div>
+              <div class="toggle" id="togglePCD"></div>
+            </div>
+          </div>
+
+          <div id="deficienciaBlock" class="hidden" style="margin-bottom:18px">
+            <div class="form-label" style="margin-bottom:8px">Tipo(s) de deficiência <span class="required">*</span></div>
+            <div class="def-grid">
+              <div class="def-item" onclick="toggleDef(this,'visual')"><div class="def-check">✓</div>Visual</div>
+              <div class="def-item" onclick="toggleDef(this,'auditiva')"><div class="def-check">✓</div>Auditiva</div>
+              <div class="def-item" onclick="toggleDef(this,'fisica')"><div class="def-check">✓</div>Física</div>
+              <div class="def-item" onclick="toggleDef(this,'intelectual')"><div class="def-check">✓</div>Intelectual</div>
+              <div class="def-item" onclick="toggleDef(this,'autismo')"><div class="def-check">✓</div>Autismo (TEA)</div>
+              <div class="def-item" onclick="toggleDef(this,'superdotacao')"><div class="def-check">✓</div>Superdotação</div>
+              <div class="def-item" onclick="toggleDef(this,'multipla')"><div class="def-check">✓</div>Múltipla</div>
+              <div class="def-item" onclick="toggleDef(this,'surdocegueira')"><div class="def-check">✓</div>Surdocegueira</div>
+            </div>
+          </div>
+
+          <div class="toggle-wrap" onclick="toggleTransporte()">
+            <div>
+              <div class="toggle-label">Usa Transporte Escolar?</div>
+              <div class="toggle-sub">Ônibus, van ou outro transporte fornecido</div>
+            </div>
+            <div class="toggle" id="toggleTransporte"></div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-outline" onclick="goTo(2)">← Voltar</button>
+            <button class="btn btn-navy" onclick="goTo(4)">Próximo →</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 4 — RESPONSÁVEL -->
+    <div id="step4" class="hidden">
+      <div class="form-card">
+        <div class="form-card-head">
+          <div class="form-card-icon">👨‍👩‍👧</div>
+          <div>
+            <div class="form-card-title">Dados do Responsável</div>
+            <div class="form-card-sub">Quem está preenchendo este formulário</div>
+          </div>
+        </div>
+        <div class="form-card-body">
+          <div class="form-row single">
+            <div class="form-group">
+              <label class="form-label">Nome do Responsável <span class="required">*</span></label>
+              <input class="form-input" id="f_responsavel" placeholder="Nome completo" oninput="this.value=this.value.toUpperCase()" />
+              <div class="form-error" id="err_resp">Nome do responsável é obrigatório</div>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label">WhatsApp</label>
+              <input class="form-input" id="f_tel" placeholder="(00) 00000-0000" maxlength="15" oninput="maskPhone(this)" />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Parentesco</label>
+              <select class="form-input" id="f_parentesco">
+                <option value="mae">Mãe</option>
+                <option value="pai">Pai</option>
+                <option value="avo">Avó/Avô</option>
+                <option value="outro">Outro</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- RESUMO -->
+          <div style="background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:16px;margin-top:18px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:12px">Resumo do cadastro</div>
+            <div id="resumoContent"></div>
+          </div>
+
+          <div id="validacaoAlerta" class="hidden" style="background:#fff5f5;border:1px solid rgba(192,57,43,0.2);border-radius:var(--radius-sm);padding:14px;margin-top:14px">
+            <div style="font-size:0.82rem;color:var(--error);font-weight:600;margin-bottom:6px">⚠️ Campos pendentes para o Censo:</div>
+            <div id="validacaoLista" style="font-size:0.8rem;color:#c0392b;line-height:1.8"></div>
+            <div style="font-size:0.75rem;color:var(--text-soft);margin-top:8px">O cadastro será salvo como <strong>pendente</strong> e a secretaria será notificada.</div>
+          </div>
+
+          <div class="btn-row">
+            <button class="btn btn-outline" onclick="goTo(3)">← Voltar</button>
+            <button class="btn btn-gold" onclick="submitForm()">✓ Enviar Cadastro</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div id="stepSuccess" class="hidden">
+      <div class="form-card">
+        <div class="form-card-body">
+          <div class="success-wrap">
+            <span class="success-icon">✅</span>
+            <h2 class="success-title">Cadastro enviado!</h2>
+            <p class="success-sub">Os dados foram recebidos pela secretaria da escola.<br>Guarde o número de protocolo abaixo.</p>
+            <div class="success-card" id="successCard"></div>
+            <button class="btn btn-outline" onclick="resetForm()">+ Cadastrar outro aluno</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+// ── CONFIG ──
+const SUPA_URL = 'https://xizinjddzgqdydzfgqgs.supabase.co';
+const SUPA_KEY = 'sb_publishable_bJ4RYy44n2EbLyuGcrQ-4A_JOBoAnTE';
+const SB_H = { 'Content-Type':'application/json', 'apikey': SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY };
+
+// Get escola_id from URL ?escola=xxx
+const params = new URLSearchParams(window.location.search);
+const ESCOLA_ID = params.get('escola');
+
+let escolaData = null;
+let pcd = false, transporte = false;
+let deficiencias = [];
+let currentStep = 1;
+
+window.addEventListener('DOMContentLoaded', async () => {
+  if (!ESCOLA_ID) {
+    showDemoMode();
+    return;
+  }
+  await loadEscola();
+});
+
+async function loadEscola() {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_escolas?id=eq.${ESCOLA_ID}`, { headers: SB_H });
+    const rows = r.ok ? await r.json() : [];
+    if (!rows.length) { showError('Escola não encontrada.'); return; }
+    escolaData = rows[0];
+
+    // Check assinatura
+    const ra = await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas?escola_id=eq.${ESCOLA_ID}&order=created_at.desc&limit=1`, { headers: SB_H });
+    const assinaturas = ra.ok ? await ra.json() : [];
+    const assinatura = assinaturas[0];
+
+    if (assinatura && assinatura.status === 'inativo') {
+      showBlocked();
+      return;
+    }
+
+    document.getElementById('loadingScreen').classList.add('hidden');
+    document.getElementById('portalScreen').classList.remove('hidden');
+    document.getElementById('hEscolaNome').textContent = escolaData.nome;
+    document.getElementById('heroEscola').textContent = '🏫 ' + escolaData.nome;
+    if (escolaData.cidade) document.getElementById('heroEscola').textContent += ' — ' + escolaData.cidade;
+
+  } catch(e) {
+    showError('Erro ao carregar. Tente novamente.');
+  }
+}
+
+function showDemoMode() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('portalScreen').classList.remove('hidden');
+  document.getElementById('hEscolaNome').textContent = 'Escola Demo';
+  document.getElementById('heroEscola').textContent = '🏫 Modo demonstração';
+  escolaData = { id: 'demo', nome: 'Escola Demo', whatsapp: '' };
+  showToast('⚠️ Modo demo — sem escola definida na URL', 'warning');
+}
+
+function showBlocked() {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.getElementById('blockedScreen').classList.remove('hidden');
+  const wa = escolaData?.whatsapp?.replace(/\D/g,'');
+  if (wa) document.getElementById('blockedWA').href = `https://wa.me/55${wa}`;
+}
+
+function showError(msg) {
+  document.getElementById('loadingScreen').classList.add('hidden');
+  document.body.innerHTML = `<div style="text-align:center;padding:60px 24px;font-family:var(--font-body)"><div style="font-size:3rem;margin-bottom:14px">😔</div><h2 style="color:var(--navy)">${msg}</h2></div>`;
+}
+
+// ── NAVIGATION ──
+function goTo(step) {
+  if (step > currentStep && !validateStep(currentStep)) return;
+  if (step === 4) renderResumo();
+
+  [1,2,3,4].forEach(s => {
+    document.getElementById('step'+s).classList.add('hidden');
+    const si = document.getElementById('si'+s);
+    if (s < step) { si.className = 'step-item done'; si.querySelector('.step-dot').textContent = '✓'; }
+    else if (s === step) { si.className = 'step-item active'; si.querySelector('.step-dot').textContent = s; }
+    else { si.className = 'step-item'; si.querySelector('.step-dot').textContent = s; }
+    if (s < 4) document.getElementById('sl'+s).classList.toggle('done', s < step);
+  });
+
+  document.getElementById('step'+step).classList.remove('hidden');
+  document.getElementById('progressFill').style.width = (step * 25) + '%';
+  currentStep = step;
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function validateStep(step) {
+  let ok = true;
+  if (step === 1) {
+    const nome = document.getElementById('f_nome').value.trim();
+    const nasc = document.getElementById('f_nascimento').value;
+    const sexo = document.getElementById('f_sexo').value;
+    if (!nome) { showFieldError('err_nome', 'f_nome'); ok = false; }
+    if (!nasc) { showFieldError('err_nascimento', 'f_nascimento'); ok = false; }
+    if (!sexo) { showFieldError('err_sexo', 'f_sexo'); ok = false; }
+  }
+  if (step === 2) {
+    const cpf = document.getElementById('f_cpf').value.replace(/\D/g,'');
+    const raca = document.getElementById('f_raca').value;
+    if (cpf && cpf.length !== 11) { showFieldError('err_cpf', 'f_cpf', 'CPF deve ter 11 dígitos'); ok = false; }
+    if (!raca) { showFieldError('err_raca', 'f_raca'); ok = false; }
+  }
+  if (step === 4) {
+    const resp = document.getElementById('f_responsavel').value.trim();
+    if (!resp) { showFieldError('err_resp', 'f_responsavel'); ok = false; }
+  }
+  if (!ok) showToast('⚠️ Corrija os campos destacados', 'warning');
+  return ok;
+}
+
+function showFieldError(errId, inputId, msg) {
+  const el = document.getElementById(errId);
+  const inp = document.getElementById(inputId);
+  el.classList.add('show');
+  inp.classList.add('error');
+  if (msg) el.textContent = msg;
+  inp.addEventListener('input', () => { el.classList.remove('show'); inp.classList.remove('error'); }, { once: true });
+}
+
+// ── TOGGLES ──
+function togglePCD() {
+  pcd = !pcd;
+  document.getElementById('togglePCD').classList.toggle('on', pcd);
+  document.getElementById('deficienciaBlock').classList.toggle('hidden', !pcd);
+  if (!pcd) deficiencias = [];
+}
+function toggleTransporte() {
+  transporte = !transporte;
+  document.getElementById('toggleTransporte').classList.toggle('on', transporte);
+}
+function toggleDef(el, val) {
+  el.classList.toggle('selected');
+  if (el.classList.contains('selected')) { if (!deficiencias.includes(val)) deficiencias.push(val); }
+  else { deficiencias = deficiencias.filter(d => d !== val); }
+}
+
+// ── MASKS ──
+function maskCPF(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  if (v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{1,2})/,'$1.$2.$3-$4');
+  else if (v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/,'$1.$2.$3');
+  else if (v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/,'$1.$2');
+  el.value = v;
+}
+function maskCEP(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,8);
+  if (v.length > 5) v = v.replace(/(\d{5})(\d{1,3})/,'$1-$2');
+  el.value = v;
+}
+function maskPhone(el) {
+  let v = el.value.replace(/\D/g,'').substring(0,11);
+  if (v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/,'($1) $2-$3');
+  else if (v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{1,4})/,'($1) $2-$3');
+  else if (v.length > 2) v = v.replace(/(\d{2})(\d{1,4})/,'($1) $2');
+  el.value = v;
+}
+
+// ── RESUMO & VALIDAÇÃO ──
+const RACAS = { '1':'Branca','2':'Preta','3':'Parda','4':'Amarela','5':'Indígena' };
+const SEXOS = { '1':'Masculino','2':'Feminino' };
+
+function renderResumo() {
+  const cpf = document.getElementById('f_cpf').value.replace(/\D/g,'');
+  const nis = document.getElementById('f_nis').value;
+  const raca = document.getElementById('f_raca').value;
+  const rows = [
+    ['Aluno', document.getElementById('f_nome').value || '—'],
+    ['Nascimento', document.getElementById('f_nascimento').value ? fmtDate(document.getElementById('f_nascimento').value) : '—'],
+    ['Sexo', SEXOS[document.getElementById('f_sexo').value] || '—'],
+    ['CPF', cpf ? formatCPF(cpf) : '⚠️ Não informado'],
+    ['NIS', nis || '—'],
+    ['Cor/Raça', RACAS[raca] || '—'],
+    ['PcD', pcd ? (deficiencias.length ? deficiencias.join(', ') : 'Sim') : 'Não'],
+    ['Transporte', transporte ? 'Sim' : 'Não'],
+  ];
+  document.getElementById('resumoContent').innerHTML = rows.map(([k,v]) =>
+    `<div style="display:flex;justify-content:space-between;padding:5px 0;font-size:0.82rem;border-bottom:1px solid rgba(201,168,76,0.15)"><span style="color:var(--text-mid)">${k}</span><strong>${v}</strong></div>`
+  ).join('');
+
+  const pendentes = [];
+  if (!cpf || cpf.length !== 11) pendentes.push('CPF do aluno');
+  if (!nis) pendentes.push('NIS / Bolsa Família');
+  if (!raca) pendentes.push('Cor/Raça');
+
+  const alertEl = document.getElementById('validacaoAlerta');
+  if (pendentes.length) {
+    alertEl.classList.remove('hidden');
+    document.getElementById('validacaoLista').innerHTML = pendentes.map(p => `• ${p}`).join('<br>');
+  } else {
+    alertEl.classList.add('hidden');
+  }
+}
+
+function formatCPF(v) { return v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
+function fmtDate(d) { const [y,m,day]=d.split('-'); return `${day}/${m}/${y}`; }
+
+// ── SUBMIT ──
+async function submitForm() {
+  if (!validateStep(4)) return;
+
+  const cpf = document.getElementById('f_cpf').value.replace(/\D/g,'');
+  const nis = document.getElementById('f_nis').value;
+  const raca = document.getElementById('f_raca').value;
+
+  const pendentes = [];
+  if (!cpf || cpf.length !== 11) pendentes.push('cpf');
+  if (!nis) pendentes.push('nis');
+  if (!raca) pendentes.push('raca');
+  const status = pendentes.length === 0 ? 'completo' : 'pendente';
+
+  const aluno = {
+    escola_id: escolaData.id === 'demo' ? null : escolaData.id,
+    nome_completo: document.getElementById('f_nome').value.trim(),
+    cpf: cpf || null,
+    data_nascimento: document.getElementById('f_nascimento').value || null,
+    nis_bolsa_familia: nis || null,
+    cor_raca: raca ? parseInt(raca) : null,
+    sexo: parseInt(document.getElementById('f_sexo').value) || null,
+    pcd,
+    tipo_deficiencia: pcd && deficiencias.length ? JSON.stringify(deficiencias) : null,
+    uso_transporte: transporte,
+    nome_responsavel: document.getElementById('f_responsavel').value.trim(),
+    telefone_responsavel: document.getElementById('f_tel').value,
+    cep: document.getElementById('f_cep').value.replace(/\D/g,'') || null,
+    zona: document.getElementById('f_zona').value || null,
+    status_censo: status,
+  };
+
+  if (escolaData.id === 'demo') {
+    showToast('⚠️ Modo demo — dados não salvos', 'warning');
+    showSuccess(aluno, 'DEMO-001');
+    return;
+  }
+
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_alunos`, {
+      method: 'POST',
+      headers: { ...SB_H, 'Prefer': 'return=representation' },
+      body: JSON.stringify([aluno])
+    });
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    showSuccess(aluno, data[0]?.id?.substring(0,8).toUpperCase() || '—');
+    showToast('✅ Cadastro enviado com sucesso!', 'success');
+  } catch(e) {
+    showToast('❌ Erro ao enviar. Tente novamente.', 'error');
+  }
+}
+
+function showSuccess(aluno, protocolo) {
+  [1,2,3,4].forEach(s => document.getElementById('step'+s).classList.add('hidden'));
+  document.getElementById('progressFill').style.width = '100%';
+  [1,2,3,4].forEach(s => { const si=document.getElementById('si'+s); si.className='step-item done'; si.querySelector('.step-dot').textContent='✓'; });
+
+  document.getElementById('successCard').innerHTML = `
+    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:0.85rem;border-bottom:1px solid rgba(201,168,76,0.15)"><span>Aluno</span><strong>${aluno.nome_completo}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:0.85rem;border-bottom:1px solid rgba(201,168,76,0.15)"><span>Status Censo</span><strong style="color:${aluno.status_censo==='completo'?'var(--success)':'var(--error)'}">${aluno.status_censo==='completo'?'✅ Completo':'⏳ Pendente'}</strong></div>
+    <div style="display:flex;justify-content:space-between;padding:7px 0;font-size:0.85rem"><span>Protocolo</span><strong style="color:var(--navy);font-size:1rem">#${protocolo}</strong></div>`;
+
+  document.getElementById('stepSuccess').classList.remove('hidden');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function resetForm() {
+  ['f_nome','f_nascimento','f_cpf','f_nis','f_responsavel','f_tel','f_cep'].forEach(id => document.getElementById(id).value = '');
+  ['f_sexo','f_raca','f_zona','f_parentesco'].forEach(id => document.getElementById(id).selectedIndex = 0);
+  pcd = false; transporte = false; deficiencias = [];
+  document.getElementById('togglePCD').classList.remove('on');
+  document.getElementById('toggleTransporte').classList.remove('on');
+  document.getElementById('deficienciaBlock').classList.add('hidden');
+  document.querySelectorAll('.def-item').forEach(d => d.classList.remove('selected'));
+  document.getElementById('stepSuccess').classList.add('hidden');
+  goTo(1);
+}
+
+// ── TOAST ──
+function showToast(msg, type='') {
+  const t = document.createElement('div');
+  t.className = `toast ${type}`;
+  t.innerHTML = `<span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(() => { t.style.animation='toastOut 0.3s ease forwards'; setTimeout(()=>t.remove(),300); }, 4000);
+}
+</script>
+</body>
+</html>

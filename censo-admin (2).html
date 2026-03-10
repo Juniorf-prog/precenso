@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin — Pré-Censo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0d1b3e;--navy2:#152249;--navy3:#1e2f5a;
+  --gold:#c9a84c;--gold-light:#e2c47a;--gold-pale:#fdf6e3;--gold-dim:rgba(201,168,76,0.12);
+  --cream:#fafbff;--white:#fff;
+  --text:#0d1b3e;--text-mid:#4a5a8a;--text-soft:#8a9ac0;
+  --border:rgba(13,27,62,0.1);--border-mid:rgba(13,27,62,0.16);
+  --shadow:0 8px 32px rgba(13,27,62,0.11);--shadow-lg:0 20px 60px rgba(13,27,62,0.16);
+  --radius:16px;--radius-sm:10px;
+  --success:#1a8c5a;--error:#c0392b;
+  --font-display:'Playfair Display',serif;--font-body:'Plus Jakarta Sans',sans-serif;
+  --tr:all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);-webkit-font-smoothing:antialiased;}
+button{font-family:var(--font-body);cursor:pointer;}
+input,select{font-family:var(--font-body);}
+.hidden{display:none!important;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 60%,#1a3a6e 100%);padding:24px;}
+.login-card{background:var(--white);border-radius:var(--radius);padding:44px 38px;width:100%;max-width:380px;text-align:center;box-shadow:var(--shadow-lg);animation:fadeUp 0.5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{width:52px;height:52px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:1.5rem;margin:0 auto 14px;}
+.login-title{font-family:var(--font-display);font-size:1.7rem;color:var(--navy);margin-bottom:4px;}
+.login-sub{font-size:0.82rem;color:var(--text-soft);margin-bottom:26px;}
+
+/* SHELL */
+.shell{min-height:100vh;display:flex;flex-direction:column;}
+.topbar{background:var(--navy);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;}
+.tb-brand{display:flex;align-items:center;gap:12px;}
+.tb-icon{width:34px;height:34px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;}
+.tb-name{font-family:var(--font-display);font-size:1rem;color:white;}
+.tb-sub{font-size:0.65rem;color:rgba(255,255,255,0.4);}
+.content{flex:1;padding:28px;max-width:1000px;margin:0 auto;width:100%;}
+
+/* CARD */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 2px 12px rgba(13,27,62,0.07);padding:22px;margin-bottom:20px;}
+.card-title{font-family:var(--font-display);font-size:1.05rem;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 22px;border-radius:100px;border:none;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:var(--tr);white-space:nowrap;}
+.btn:active{transform:scale(0.97);}
+.btn-navy{background:linear-gradient(135deg,var(--navy),var(--navy3));color:white;box-shadow:0 4px 14px rgba(13,27,62,0.3);}
+.btn-navy:hover{box-shadow:0 6px 22px rgba(13,27,62,0.45);transform:translateY(-1px);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);font-weight:800;}
+.btn-outline{background:transparent;border:1.5px solid var(--border-mid);color:var(--text-mid);}
+.btn-outline:hover{border-color:var(--navy);color:var(--navy);}
+.btn-red{background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.2);color:var(--error);}
+.btn-red:hover{background:rgba(192,57,43,0.18);}
+.btn-sm{padding:7px 16px;font-size:0.78rem;}
+.btn-xs{padding:5px 11px;font-size:0.7rem;}
+.w-full{width:100%;}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:14px;}
+.form-row.single{grid-template-columns:1fr;}
+.form-group{display:flex;flex-direction:column;gap:6px;}
+.form-group.full{grid-column:1/-1;}
+.form-label{font-size:0.7rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.6px;}
+.form-input{padding:10px 13px;border:1.5px solid var(--border-mid);border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text);background:var(--cream);outline:none;transition:var(--tr);width:100%;}
+.form-input:focus{border-color:var(--navy);background:white;box-shadow:0 0 0 3px rgba(13,27,62,0.07);}
+select.form-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;background-color:var(--cream);}
+@media(max-width:540px){.form-row{grid-template-columns:1fr;}}
+
+/* TABLE */
+.ns-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.ns-table th{text-align:left;padding:10px 13px;font-size:0.65rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;border-bottom:2px solid var(--border);}
+.ns-table td{padding:12px 13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ns-table tbody tr:hover{background:rgba(13,27,62,0.02);}
+.ns-table tbody tr:last-child td{border-bottom:none;}
+.table-wrap{overflow-x:auto;}
+
+/* BADGE */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:700;}
+.badge-green{background:rgba(26,140,90,0.1);color:var(--success);}
+.badge-red{background:rgba(192,57,43,0.1);color:var(--error);}
+
+/* ID BOX */
+.id-box{display:flex;align-items:center;gap:7px;background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:12px 16px;margin-top:14px;}
+.id-val{font-family:monospace;font-size:0.82rem;color:var(--navy);word-break:break-all;flex:1;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(13,27,62,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--white);border-radius:var(--radius);padding:30px;width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(0.95) translateY(16px);transition:var(--tr);border-top:4px solid var(--gold);}
+.modal-overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-title{font-family:var(--font-display);font-size:1.2rem;}
+.modal-close{background:none;border:none;color:var(--text-soft);font-size:1.1rem;cursor:pointer;padding:4px;border-radius:6px;}
+.modal-close:hover{background:var(--border);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:20px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--white);border-radius:var(--radius-sm);padding:12px 16px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:220px;pointer-events:all;border-left:4px solid var(--navy);font-size:0.85rem;font-weight:600;animation:toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{to{transform:translateX(120%);opacity:0}}
+.toast.success{border-left-color:var(--success);}.toast.warning{border-left-color:var(--gold);}.toast.error{border-left-color:var(--error);}
+
+/* EMPTY */
+.empty{text-align:center;padding:40px 24px;color:var(--text-soft);}
+.empty-icon{font-size:2.5rem;margin-bottom:10px;display:block;opacity:0.5;}
+
+/* SUCCESS CARD */
+.success-card{background:linear-gradient(135deg,var(--navy),var(--navy3));border-radius:var(--radius);padding:24px;color:white;margin-top:14px;}
+.sc-label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.8px;color:rgba(255,255,255,0.5);margin-bottom:4px;font-weight:700;}
+.sc-val{font-family:monospace;font-size:0.9rem;word-break:break-all;}
+.sc-val.big{font-family:var(--font-display);font-size:1.3rem;font-family:monospace;}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">🏫</div>
+      <div class="login-title">Pré-Censo Admin</div>
+      <div class="login-sub">Gerenciamento de escolas</div>
+      <div style="background:#fff5f5;border:1px solid rgba(192,57,43,0.3);border-radius:var(--radius-sm);padding:10px;font-size:0.82rem;color:var(--error);margin-bottom:14px;display:none" id="loginError">Senha incorreta.</div>
+      <div class="form-group" style="text-align:left;margin-bottom:16px">
+        <label class="form-label">Senha Admin</label>
+        <input class="form-input" type="password" id="loginPwd" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn btn-navy w-full" onclick="doLogin()">Entrar →</button>
+      <p style="font-size:0.7rem;color:var(--text-soft);margin-top:16px">Senha padrão: <strong>admin123</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="shell" class="shell hidden">
+  <div class="topbar">
+    <div class="tb-brand">
+      <div class="tb-icon">🏫</div>
+      <div>
+        <div class="tb-name">Pré-Censo Admin</div>
+        <div class="tb-sub">Gerenciamento de escolas</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px">
+      <button class="btn btn-gold btn-sm" onclick="openModal('novaEscolaModal')">+ Nova Escola</button>
+      <button class="btn btn-outline btn-sm" style="color:rgba(255,255,255,0.5);border-color:rgba(255,255,255,0.2)" onclick="doLogout()">Sair</button>
+    </div>
+  </div>
+
+  <div class="content">
+    <!-- STATS -->
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:22px" id="statsRow"></div>
+
+    <!-- ESCOLAS -->
+    <div class="card">
+      <div class="card-title">
+        🏫 Escolas Cadastradas
+        <button class="btn btn-navy btn-sm" onclick="openModal('novaEscolaModal')">+ Nova Escola</button>
+      </div>
+      <div class="table-wrap" id="escolasTableWrap">
+        <div class="empty"><span class="empty-icon">🏫</span><p>Carregando...</p></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL NOVA ESCOLA -->
+<div class="modal-overlay" id="novaEscolaModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="modalEscolaTitle">Nova Escola</div>
+      <button class="modal-close" onclick="closeModal('novaEscolaModal')">✕</button>
+    </div>
+
+    <div class="form-row">
+      <div class="form-group full">
+        <label class="form-label">Nome da Escola *</label>
+        <input class="form-input" id="eNome" placeholder="Ex: E.M. João da Silva" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">INEP</label>
+        <input class="form-input" id="eInep" placeholder="Código INEP" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cidade</label>
+        <input class="form-input" id="eCidade" placeholder="Ex: Aracaju" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select class="form-input" id="eEstado">
+          <option value="">Selecione...</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option selected>SE</option><option>SP</option><option>TO</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Telefone</label>
+        <input class="form-input" id="eTelefone" placeholder="(79) 3333-3333" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input class="form-input" id="eWhatsapp" placeholder="(79) 99999-9999" />
+      </div>
+      <div class="form-group full">
+        <label class="form-label">E-mail</label>
+        <input class="form-input" id="eEmail" type="email" placeholder="secretaria@escola.edu.br" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha de acesso *</label>
+        <input class="form-input" id="eSenha" placeholder="Senha para o painel" value="1234" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="eStatus">
+          <option value="ativo">✅ Ativo</option>
+          <option value="inativo">🔒 Bloqueado</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- RESULTADO APÓS CRIAR -->
+    <div id="escolaCriada" class="hidden">
+      <div class="success-card">
+        <div class="sc-label">✅ Escola criada com sucesso!</div>
+        <div style="margin-top:14px">
+          <div class="sc-label">ID DA ESCOLA (para login)</div>
+          <div class="sc-val big" id="resId">—</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="sc-label">SENHA</div>
+          <div class="sc-val" id="resSenha">—</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="sc-label">LINK DO PAINEL</div>
+          <div class="sc-val" id="resLink">—</div>
+        </div>
+        <div style="margin-top:12px">
+          <div class="sc-label">LINK DE MATRÍCULA (para os pais)</div>
+          <div class="sc-val" id="resMatricula">—</div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+          <button class="btn btn-gold btn-sm" onclick="copiarCredenciais()">📋 Copiar credenciais</button>
+          <button class="btn btn-outline btn-sm" style="color:rgba(255,255,255,0.6);border-color:rgba(255,255,255,0.2)" onclick="resetForm()">+ Cadastrar outra</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer" id="modalFooter">
+      <button class="btn btn-outline" onclick="closeModal('novaEscolaModal')">Cancelar</button>
+      <button class="btn btn-navy" onclick="salvarEscola()" id="btnSalvar">🏫 Criar Escola</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DETALHES ESCOLA -->
+<div class="modal-overlay" id="detalhesModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="detModalTitle">Escola</div>
+      <button class="modal-close" onclick="closeModal('detalhesModal')">✕</button>
+    </div>
+    <div id="detModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-red btn-sm" onclick="excluirEscola()">🗑 Excluir</button>
+      <button class="btn btn-outline" onclick="closeModal('detalhesModal')">Fechar</button>
+      <button class="btn btn-navy btn-sm" onclick="salvarEdicao()">💾 Salvar alterações</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+const SUPA_URL = 'https://xizinjddzgqdydzfgqgs.supabase.co';
+const SUPA_KEY = 'sb_publishable_bJ4RYy44n2EbLyuGcrQ-4A_JOBoAnTE';
+const SB_H = { 'Content-Type':'application/json', 'apikey': SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY };
+const ADMIN_PWD_KEY = 'censo_admin_pwd';
+
+let escolas = [];
+let editEscolaId = null;
+
+function getAdminPwd() { return localStorage.getItem(ADMIN_PWD_KEY) || 'admin123'; }
+
+// ── LOGIN ──
+function doLogin() {
+  const pwd = document.getElementById('loginPwd').value;
+  if (pwd === getAdminPwd()) {
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('shell').classList.remove('hidden');
+    document.getElementById('loginPwd').value = '';
+    document.getElementById('loginError').style.display = 'none';
+    loadEscolas();
+  } else {
+    document.getElementById('loginError').style.display = 'block';
+    document.getElementById('loginPwd').value = '';
+  }
+}
+function doLogout() {
+  document.getElementById('shell').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// ── LOAD ──
+async function loadEscolas() {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_escolas?order=created_at.desc`, { headers: SB_H });
+    escolas = r.ok ? await r.json() : [];
+    renderStats();
+    renderTable();
+  } catch(e) { showToast('❌ Erro ao carregar escolas','error'); }
+}
+
+// ── STATS ──
+function renderStats() {
+  const total = escolas.length;
+  const ativas = escolas.filter(e=>e.status==='ativo').length;
+  const bloqueadas = escolas.filter(e=>e.status!=='ativo').length;
+  document.getElementById('statsRow').innerHTML = `
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 12px rgba(13,27,62,0.07)">
+      <div style="font-size:1.5rem;margin-bottom:6px">🏫</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--navy)">${total}</div>
+      <div style="font-size:0.7rem;color:var(--text-soft);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-top:3px">Total de escolas</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 12px rgba(13,27,62,0.07)">
+      <div style="font-size:1.5rem;margin-bottom:6px">✅</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--success)">${ativas}</div>
+      <div style="font-size:0.7rem;color:var(--text-soft);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-top:3px">Ativas</div>
+    </div>
+    <div style="background:var(--white);border:1px solid var(--border);border-radius:var(--radius);padding:18px;box-shadow:0 2px 12px rgba(13,27,62,0.07)">
+      <div style="font-size:1.5rem;margin-bottom:6px">🔒</div>
+      <div style="font-family:var(--font-display);font-size:1.8rem;color:var(--error)">${bloqueadas}</div>
+      <div style="font-size:0.7rem;color:var(--text-soft);text-transform:uppercase;font-weight:700;letter-spacing:0.8px;margin-top:3px">Bloqueadas</div>
+    </div>`;
+}
+
+// ── TABLE ──
+function renderTable() {
+  if (!escolas.length) {
+    document.getElementById('escolasTableWrap').innerHTML = '<div class="empty"><span class="empty-icon">🏫</span><p>Nenhuma escola cadastrada ainda</p><button class="btn btn-navy btn-sm" onclick="openModal(\'novaEscolaModal\')" style="margin-top:12px">+ Cadastrar primeira escola</button></div>';
+    return;
+  }
+  document.getElementById('escolasTableWrap').innerHTML = `
+    <table class="ns-table">
+      <thead><tr><th>Escola</th><th>Cidade/UF</th><th>Status</th><th>Senha</th><th>Ações</th></tr></thead>
+      <tbody>${escolas.map(e=>`
+        <tr>
+          <td>
+            <div style="font-weight:700">${e.nome}</div>
+            <div style="font-size:0.7rem;color:var(--text-soft);font-family:monospace;margin-top:2px">${e.id}</div>
+          </td>
+          <td style="font-size:0.82rem">${[e.cidade,e.estado].filter(Boolean).join(' / ')||'—'}</td>
+          <td>${e.status==='ativo'?'<span class="badge badge-green">✅ Ativo</span>':'<span class="badge badge-red">🔒 Bloqueado</span>'}</td>
+          <td><span style="font-family:monospace;font-size:0.82rem">${e.senha||'—'}</span></td>
+          <td>
+            <div style="display:flex;gap:6px;flex-wrap:wrap">
+              <button class="btn btn-outline btn-xs" onclick="verDetalhes('${e.id}')">✏️ Editar</button>
+              <button class="btn btn-xs ${e.status==='ativo'?'btn-red':'btn-navy'}" onclick="toggleStatus('${e.id}')">${e.status==='ativo'?'🔒 Bloquear':'✅ Ativar'}</button>
+              <button class="btn btn-outline btn-xs" onclick="copiarId('${e.id}')">📋 ID</button>
+            </div>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+}
+
+// ── NOVA ESCOLA ──
+async function salvarEscola() {
+  const nome = document.getElementById('eNome').value.trim();
+  const senha = document.getElementById('eSenha').value.trim();
+  if (!nome) { showToast('⚠️ Informe o nome da escola','warning'); return; }
+  if (!senha) { showToast('⚠️ Defina uma senha','warning'); return; }
+
+  document.getElementById('btnSalvar').disabled = true;
+  document.getElementById('btnSalvar').textContent = '⏳ Criando...';
+
+  try {
+    const payload = {
+      nome, senha,
+      inep: document.getElementById('eInep').value.trim()||null,
+      cidade: document.getElementById('eCidade').value.trim()||null,
+      estado: document.getElementById('eEstado').value||null,
+      telefone: document.getElementById('eTelefone').value.trim()||null,
+      whatsapp: document.getElementById('eWhatsapp').value.trim()||null,
+      email: document.getElementById('eEmail').value.trim()||null,
+      status: document.getElementById('eStatus').value,
+    };
+
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_escolas`, {
+      method:'POST',
+      headers:{ ...SB_H, 'Prefer':'return=representation' },
+      body: JSON.stringify([payload])
+    });
+    if (!r.ok) {
+      const errBody = await r.json().catch(()=>({}));
+      const msg = errBody?.message || errBody?.hint || errBody?.details || JSON.stringify(errBody);
+      throw new Error(msg);
+    }
+    const data = await r.json();
+    const escola = data[0];
+
+    // Criar assinatura ativa
+    await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas`, {
+      method:'POST',
+      headers:SB_H,
+      body: JSON.stringify([{ escola_id: escola.id, status: payload.status }])
+    });
+
+    // Mostrar credenciais
+    const base = 'https://censomatricula.netlify.app/';
+    document.getElementById('resId').textContent = escola.id;
+    document.getElementById('resSenha').textContent = senha;
+    document.getElementById('resLink').textContent = 'https://censopainel.netlify.app/censo-painel.html';
+    document.getElementById('resMatricula').textContent = `https://censomatricula.netlify.app/censo-matricula.html?escola=${escola.id}`;
+    document.getElementById('escolaCriada').classList.remove('hidden');
+    document.getElementById('modalFooter').classList.add('hidden');
+
+    showToast('✅ Escola criada com sucesso!','success');
+    loadEscolas();
+  } catch(e) {
+    showToast('❌ ' + (e.message || 'Erro ao criar escola'), 'error');
+    console.error('Erro ao criar escola:', e);
+  } finally {
+    document.getElementById('btnSalvar').disabled = false;
+    document.getElementById('btnSalvar').textContent = '🏫 Criar Escola';
+  }
+}
+
+function copiarCredenciais() {
+  const id = document.getElementById('resId').textContent;
+  const senha = document.getElementById('resSenha').textContent;
+  const painel = document.getElementById('resLink').textContent;
+  const matricula = document.getElementById('resMatricula').textContent;
+  const txt = `🏫 Pré-Censo — Credenciais de Acesso\n\n📋 ID da Escola: ${id}\n🔑 Senha: ${senha}\n\n🖥️ Link do Painel: ${painel}\n(Acesse com o ID e senha acima)\n\n📱 Link de Matrícula (para os pais):\n${matricula}`;
+  navigator.clipboard.writeText(txt).then(()=>showToast('📋 Copiado!','success'));
+}
+
+function resetForm() {
+  ['eNome','eInep','eCidade','eTelefone','eWhatsapp','eEmail'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('eSenha').value='1234';
+  document.getElementById('eEstado').value='SE';
+  document.getElementById('eStatus').value='ativo';
+  document.getElementById('escolaCriada').classList.add('hidden');
+  document.getElementById('modalFooter').classList.remove('hidden');
+}
+
+// ── TOGGLE STATUS ──
+async function toggleStatus(id) {
+  const e = escolas.find(x=>x.id===id); if(!e) return;
+  const novoStatus = e.status === 'ativo' ? 'inativo' : 'ativo';
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/censo_escolas?id=eq.${id}`, {
+      method:'PATCH', headers:SB_H, body: JSON.stringify({ status: novoStatus })
+    });
+    await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas?escola_id=eq.${id}`, {
+      method:'PATCH', headers:SB_H, body: JSON.stringify({ status: novoStatus })
+    });
+    showToast(novoStatus==='ativo'?'✅ Escola ativada!':'🔒 Escola bloqueada!', novoStatus==='ativo'?'success':'warning');
+    loadEscolas();
+  } catch(e) { showToast('❌ Erro','error'); }
+}
+
+// ── DETALHES / EDITAR ──
+function verDetalhes(id) {
+  const e = escolas.find(x=>x.id===id); if(!e) return;
+  editEscolaId = id;
+  document.getElementById('detModalTitle').textContent = e.nome;
+  const base = 'https://censomatricula.netlify.app/';
+  document.getElementById('detModalBody').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px">
+      <div class="form-group full">
+        <label class="form-label">Nome</label>
+        <input class="form-input" id="ed_nome" value="${e.nome||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">INEP</label>
+        <input class="form-input" id="ed_inep" value="${e.inep||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Cidade</label>
+        <input class="form-input" id="ed_cidade" value="${e.cidade||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Senha</label>
+        <input class="form-input" id="ed_senha" value="${e.senha||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">WhatsApp</label>
+        <input class="form-input" id="ed_whatsapp" value="${e.whatsapp||''}" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-input" id="ed_status">
+          <option value="ativo" ${e.status==='ativo'?'selected':''}>✅ Ativo</option>
+          <option value="inativo" ${e.status!=='ativo'?'selected':''}>🔒 Bloqueado</option>
+        </select>
+      </div>
+    </div>
+    <div style="background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:14px">
+      <div style="font-size:0.65rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Links</div>
+      <div style="font-size:0.72rem;color:var(--text-mid);margin-bottom:6px">
+        <strong>ID:</strong> <span style="font-family:monospace">${e.id}</span>
+        <button class="btn btn-outline btn-xs" onclick="copiarId('${e.id}')" style="margin-left:8px">📋</button>
+      </div>
+      <div style="font-size:0.72rem;color:var(--text-mid);margin-bottom:6px">
+        <strong>Matrícula:</strong> <span style="font-family:monospace">${base}censo-matricula.html?escola=${e.id}</span>
+        <button class="btn btn-outline btn-xs" onclick="navigator.clipboard.writeText('${base}censo-matricula.html?escola=${e.id}').then(()=>showToast('Copiado!','success'))" style="margin-left:8px">📋</button>
+      </div>
+    </div>`;
+  openModal('detalhesModal');
+}
+
+async function salvarEdicao() {
+  const payload = {
+    nome: document.getElementById('ed_nome').value.trim(),
+    inep: document.getElementById('ed_inep').value.trim()||null,
+    cidade: document.getElementById('ed_cidade').value.trim()||null,
+    senha: document.getElementById('ed_senha').value.trim(),
+    whatsapp: document.getElementById('ed_whatsapp').value.trim()||null,
+    status: document.getElementById('ed_status').value,
+  };
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/censo_escolas?id=eq.${editEscolaId}`, { method:'PATCH', headers:SB_H, body:JSON.stringify(payload) });
+    await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas?escola_id=eq.${editEscolaId}`, { method:'PATCH', headers:SB_H, body:JSON.stringify({ status: payload.status }) });
+    closeModal('detalhesModal');
+    showToast('✅ Escola atualizada!','success');
+    loadEscolas();
+  } catch(e) { showToast('❌ Erro ao salvar','error'); }
+}
+
+async function excluirEscola() {
+  if (!confirm('Excluir esta escola e todos os dados?')) return;
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/censo_alunos?escola_id=eq.${editEscolaId}`, { method:'DELETE', headers:SB_H });
+    await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas?escola_id=eq.${editEscolaId}`, { method:'DELETE', headers:SB_H });
+    await fetch(`${SUPA_URL}/rest/v1/censo_escolas?id=eq.${editEscolaId}`, { method:'DELETE', headers:SB_H });
+    closeModal('detalhesModal');
+    showToast('🗑 Escola excluída','warning');
+    loadEscolas();
+  } catch(e) { showToast('❌ Erro','error'); }
+}
+
+// ── UTILS ──
+function copiarId(id) { navigator.clipboard.writeText(id).then(()=>showToast('📋 ID copiado!','success')); }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); if(id==='novaEscolaModal') resetForm(); }
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function showToast(msg,type=''){
+  const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.animation='toastOut 0.3s ease forwards';setTimeout(()=>t.remove(),300);},4000);
+}
+</script>
+</body>
+</html>

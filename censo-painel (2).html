@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Painel da Escola — Pré-Censo</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --navy:#0d1b3e;--navy2:#152249;--navy3:#1e2f5a;
+  --gold:#c9a84c;--gold-light:#e2c47a;--gold-pale:#fdf6e3;--gold-dim:rgba(201,168,76,0.12);
+  --white:#ffffff;--cream:#fafbff;
+  --text:#0d1b3e;--text-mid:#4a5a8a;--text-soft:#8a9ac0;
+  --border:rgba(13,27,62,0.1);--border-mid:rgba(13,27,62,0.16);
+  --shadow-sm:0 2px 12px rgba(13,27,62,0.07);--shadow:0 8px 32px rgba(13,27,62,0.11);--shadow-lg:0 20px 60px rgba(13,27,62,0.16);
+  --radius:16px;--radius-sm:10px;
+  --success:#1a8c5a;--error:#c0392b;--warning:#e67e22;
+  --font-display:'Playfair Display',serif;--font-body:'Plus Jakarta Sans',sans-serif;
+  --tr:all 0.22s cubic-bezier(0.4,0,0.2,1);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:var(--font-body);background:var(--cream);color:var(--text);-webkit-font-smoothing:antialiased;}
+button{font-family:var(--font-body);cursor:pointer;}
+input,select{font-family:var(--font-body);}
+.hidden{display:none!important;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-thumb{background:var(--border-mid);border-radius:3px;}
+
+/* LAYOUT */
+.shell{display:flex;min-height:100vh;}
+.sidebar{width:230px;flex-shrink:0;background:var(--navy);display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;}
+.sb-brand{padding:26px 20px 20px;border-bottom:1px solid rgba(255,255,255,0.08);}
+.sb-logo{width:38px;height:38px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:10px;}
+.sb-name{font-family:var(--font-display);font-size:1rem;color:white;line-height:1.3;}
+.sb-escola{font-size:0.68rem;color:rgba(255,255,255,0.4);margin-top:3px;}
+.sb-nav{padding:16px 10px;flex:1;}
+.sb-item{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--radius-sm);font-size:0.82rem;font-weight:600;color:rgba(255,255,255,0.55);cursor:pointer;transition:var(--tr);border:none;background:none;width:100%;text-align:left;margin-bottom:2px;}
+.sb-item:hover{background:rgba(255,255,255,0.07);color:white;}
+.sb-item.active{background:rgba(201,168,76,0.15);color:var(--gold-light);border:1px solid rgba(201,168,76,0.2);}
+.sb-item .sb-badge{margin-left:auto;background:var(--error);color:white;border-radius:100px;font-size:0.6rem;padding:2px 7px;font-weight:800;}
+.sb-footer{padding:14px 10px;border-top:1px solid rgba(255,255,255,0.08);}
+
+.main{flex:1;min-width:0;display:flex;flex-direction:column;}
+.topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 28px;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:var(--shadow-sm);gap:16px;}
+.topbar-title{font-family:var(--font-display);font-size:1.2rem;color:var(--navy);}
+.content{flex:1;padding:28px;}
+
+/* CARDS */
+.card{background:var(--white);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow-sm);padding:22px;}
+.card-title{font-family:var(--font-display);font-size:1.05rem;color:var(--navy);margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+
+/* STAT */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:22px;}
+@media(max-width:900px){.stat-grid{grid-template-columns:repeat(2,1fr);}}
+.stat-card{background:var(--white);border-radius:var(--radius);padding:20px;border:1px solid var(--border);box-shadow:var(--shadow-sm);position:relative;overflow:hidden;transition:var(--tr);}
+.stat-card:hover{transform:translateY(-2px);box-shadow:var(--shadow);}
+.stat-accent{position:absolute;top:0;left:0;right:0;height:3px;}
+.stat-icon{font-size:1.5rem;margin-bottom:10px;}
+.stat-value{font-family:var(--font-display);font-size:1.9rem;color:var(--navy);}
+.stat-label{font-size:0.7rem;color:var(--text-soft);margin-top:4px;text-transform:uppercase;letter-spacing:0.8px;font-weight:700;}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 22px;border-radius:100px;border:none;font-family:var(--font-body);font-size:0.85rem;font-weight:700;cursor:pointer;transition:var(--tr);white-space:nowrap;}
+.btn:active{transform:scale(0.97);}
+.btn-navy{background:linear-gradient(135deg,var(--navy),var(--navy3));color:white;box-shadow:0 4px 14px rgba(13,27,62,0.3);}
+.btn-navy:hover{box-shadow:0 6px 22px rgba(13,27,62,0.45);transform:translateY(-1px);}
+.btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-light));color:var(--navy);font-weight:800;}
+.btn-gold:hover{transform:translateY(-1px);}
+.btn-outline{background:transparent;border:1.5px solid var(--border-mid);color:var(--text-mid);}
+.btn-outline:hover{border-color:var(--navy);color:var(--navy);}
+.btn-red{background:rgba(192,57,43,0.1);border:1px solid rgba(192,57,43,0.25);color:var(--error);}
+.btn-red:hover{background:rgba(192,57,43,0.18);}
+.btn-sm{padding:7px 16px;font-size:0.78rem;}
+.btn-xs{padding:5px 11px;font-size:0.7rem;}
+.w-full{width:100%;}
+
+/* TABLE */
+.table-wrap{overflow-x:auto;}
+.ns-table{width:100%;border-collapse:collapse;font-size:0.85rem;}
+.ns-table th{text-align:left;padding:10px 13px;font-size:0.65rem;color:var(--text-soft);text-transform:uppercase;letter-spacing:0.8px;font-weight:700;border-bottom:2px solid var(--border);}
+.ns-table td{padding:13px;border-bottom:1px solid var(--border);vertical-align:middle;}
+.ns-table tbody tr{transition:var(--tr);}
+.ns-table tbody tr:hover{background:rgba(13,27,62,0.02);}
+.ns-table tbody tr:last-child td{border-bottom:none;}
+
+/* BADGES */
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:100px;font-size:0.68rem;font-weight:700;}
+.badge-green{background:rgba(26,140,90,0.1);color:var(--success);}
+.badge-red{background:rgba(192,57,43,0.1);color:var(--error);}
+.badge-gold{background:var(--gold-dim);color:#7a5a00;}
+.badge-navy{background:rgba(13,27,62,0.08);color:var(--navy);}
+
+/* STATUS DOT */
+.sdot{display:inline-flex;align-items:center;gap:6px;font-size:0.78rem;font-weight:600;}
+.sdot::before{content:'';width:7px;height:7px;border-radius:50%;flex-shrink:0;}
+.sdot.completo::before{background:var(--success);box-shadow:0 0 5px rgba(26,140,90,0.5);}
+.sdot.pendente::before{background:var(--warning);}
+.sdot.incompleto::before{background:var(--error);}
+
+/* SEARCH/FILTER BAR */
+.filter-bar{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px;align-items:center;}
+.search-input{padding:9px 14px;border:1.5px solid var(--border-mid);border-radius:100px;font-size:0.85rem;color:var(--text);outline:none;transition:var(--tr);width:240px;}
+.search-input:focus{border-color:var(--navy);box-shadow:0 0 0 3px rgba(13,27,62,0.07);}
+.filter-btn{padding:8px 18px;border-radius:100px;border:1.5px solid var(--border-mid);background:transparent;font-size:0.78rem;font-weight:700;color:var(--text-mid);cursor:pointer;transition:var(--tr);}
+.filter-btn:hover,.filter-btn.active{border-color:var(--navy);background:rgba(13,27,62,0.06);color:var(--navy);}
+.filter-btn.danger.active{border-color:var(--error);background:rgba(192,57,43,0.08);color:var(--error);}
+
+/* SCANNER */
+.scanner-item{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border-radius:var(--radius-sm);background:rgba(192,57,43,0.04);border:1px solid rgba(192,57,43,0.12);margin-bottom:8px;animation:fadeUp 0.3s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.scanner-icon{font-size:1.1rem;flex-shrink:0;margin-top:1px;}
+.scanner-msg{font-size:0.85rem;font-weight:600;color:var(--error);}
+.scanner-sub{font-size:0.75rem;color:var(--text-soft);margin-top:2px;}
+
+/* CHART BAR */
+.chart-bars{display:flex;flex-direction:column;gap:10px;}
+.chart-row{display:flex;align-items:center;gap:10px;}
+.chart-label{min-width:90px;font-size:0.75rem;color:var(--text-soft);text-align:right;}
+.chart-track{flex:1;background:var(--border);border-radius:100px;height:20px;overflow:hidden;}
+.chart-fill{height:100%;border-radius:100px;display:flex;align-items:center;justify-content:flex-end;padding-right:8px;font-size:0.65rem;color:white;font-weight:700;transition:width 1s cubic-bezier(0.4,0,0.2,1);min-width:20px;}
+.chart-val{min-width:55px;font-size:0.78rem;font-weight:700;color:var(--text);}
+
+/* FORM */
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:14px;}
+.form-label{font-size:0.7rem;font-weight:700;color:var(--text-mid);text-transform:uppercase;letter-spacing:0.6px;}
+.form-input{padding:10px 13px;border:1.5px solid var(--border-mid);border-radius:var(--radius-sm);font-size:0.88rem;color:var(--text);background:var(--cream);outline:none;transition:var(--tr);width:100%;}
+.form-input:focus{border-color:var(--navy);background:white;box-shadow:0 0 0 3px rgba(13,27,62,0.07);}
+select.form-input{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%234a5a8a' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;background-color:var(--cream);}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;z-index:1000;background:rgba(13,27,62,0.5);backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity 0.3s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--white);border-radius:var(--radius);padding:30px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);transform:scale(0.95) translateY(16px);transition:var(--tr);border-top:4px solid var(--gold);}
+.modal-overlay.open .modal{transform:scale(1) translateY(0);}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:22px;}
+.modal-title{font-family:var(--font-display);font-size:1.2rem;}
+.modal-close{background:none;border:none;color:var(--text-soft);font-size:1.1rem;cursor:pointer;padding:4px;border-radius:6px;}
+.modal-close:hover{background:var(--border);color:var(--text);}
+.modal-footer{display:flex;gap:10px;justify-content:flex-end;margin-top:22px;padding-top:18px;border-top:1px solid var(--border);}
+
+/* TOAST */
+.toast-wrap{position:fixed;bottom:24px;right:24px;z-index:9999;display:flex;flex-direction:column;gap:8px;pointer-events:none;}
+.toast{background:var(--white);border-radius:var(--radius-sm);padding:12px 16px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:10px;min-width:220px;pointer-events:all;border-left:4px solid var(--navy);font-size:0.85rem;font-weight:600;animation:toastIn 0.35s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes toastIn{from{transform:translateX(120%);opacity:0}to{transform:translateX(0);opacity:1}}
+@keyframes toastOut{to{transform:translateX(120%);opacity:0}}
+.toast.success{border-left-color:var(--success);}.toast.warning{border-left-color:var(--gold);}.toast.error{border-left-color:var(--error);}
+
+/* EMPTY */
+.empty{text-align:center;padding:48px 24px;color:var(--text-soft);}
+.empty-icon{font-size:3rem;margin-bottom:12px;display:block;opacity:0.5;}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy) 0%,var(--navy3) 60%,#1a3a6e 100%);padding:24px;}
+.login-card{background:var(--white);border-radius:var(--radius);padding:44px 38px;width:100%;max-width:400px;text-align:center;box-shadow:var(--shadow-lg);animation:fadeUp 0.5s ease;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+.login-logo{width:56px;height:56px;background:linear-gradient(135deg,var(--gold),var(--gold-light));border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;margin:0 auto 16px;}
+.login-title{font-family:var(--font-display);font-size:1.8rem;color:var(--navy);margin-bottom:4px;}
+.login-sub{font-size:0.85rem;color:var(--text-soft);margin-bottom:28px;}
+.login-error{background:#fff5f5;border:1px solid rgba(192,57,43,0.3);border-radius:var(--radius-sm);padding:10px;font-size:0.82rem;color:var(--error);margin-bottom:14px;}
+
+/* VIEW PANELS */
+.view-panel{display:none;}
+.view-panel.active{display:block;}
+
+/* LINK BOX */
+.link-box{display:flex;align-items:center;gap:10px;flex-wrap:wrap;background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:14px 18px;}
+.link-url{font-family:monospace;font-size:0.8rem;color:var(--text-mid);word-break:break-all;flex:1;}
+
+/* BLOCKED */
+.blocked-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--navy),var(--navy3));padding:24px;}
+.blocked-card{background:white;border-radius:var(--radius);padding:48px 36px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-lg);border-top:4px solid var(--error);}
+
+@media(max-width:768px){.sidebar{display:none;}.content{padding:18px 14px;}}
+</style>
+</head>
+<body>
+
+<!-- BLOCKED -->
+<div id="blockedScreen" class="hidden">
+  <div class="blocked-wrap">
+    <div class="blocked-card">
+      <div style="font-size:3.5rem;margin-bottom:16px">🔒</div>
+      <h2 style="font-family:var(--font-display);font-size:1.6rem;color:var(--navy);margin-bottom:10px">Acesso Suspenso</h2>
+      <p style="color:var(--text-mid);line-height:1.7;margin-bottom:24px">Sua assinatura está inativa. Entre em contato para reativar o acesso.</p>
+      <a id="blockedWA" href="#" target="_blank" class="btn btn-gold w-full" style="text-decoration:none">💬 Falar pelo WhatsApp</a>
+    </div>
+  </div>
+</div>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="login-wrap">
+    <div class="login-card">
+      <div class="login-logo">📋</div>
+      <div class="login-title">Pré-Censo</div>
+      <div class="login-sub">Painel da Secretaria Escolar</div>
+      <div class="login-error hidden" id="loginError">Senha incorreta.</div>
+      <div class="form-group" style="text-align:left;margin-bottom:18px">
+        <label class="form-label">Código da Escola</label>
+        <input class="form-input" id="loginEscola" placeholder="ID da escola..." />
+      </div>
+      <div class="form-group" style="text-align:left;margin-bottom:18px">
+        <label class="form-label">Senha</label>
+        <input class="form-input" type="password" id="loginSenha" placeholder="••••••" onkeydown="if(event.key==='Enter')doLogin()" />
+      </div>
+      <button class="btn btn-navy w-full" onclick="doLogin()">Entrar no Painel →</button>
+      <p style="font-size:0.72rem;color:var(--text-soft);margin-top:18px">Senha padrão: <strong>1234</strong></p>
+    </div>
+  </div>
+</div>
+
+<!-- SHELL -->
+<div id="shell" class="shell hidden">
+  <aside class="sidebar">
+    <div class="sb-brand">
+      <div class="sb-logo">📋</div>
+      <div class="sb-name" id="sbEscolaNome">Escola</div>
+      <div class="sb-escola" id="sbEscolaCidade"></div>
+    </div>
+    <nav class="sb-nav">
+      <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.25);padding:0 12px;margin-bottom:6px;font-weight:700">Principal</div>
+      <button class="sb-item active" onclick="switchView('dashboard',this)">📊 Dashboard</button>
+      <button class="sb-item" onclick="switchView('alunos',this)">👥 Alunos <span class="sb-badge hidden" id="navPendBadge">0</span></button>
+      <button class="sb-item" onclick="switchView('scanner',this)">🔍 Scanner de Erros</button>
+      <div style="font-size:0.6rem;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,0.25);padding:0 12px;margin:12px 0 6px;font-weight:700">Ferramentas</div>
+      <button class="sb-item" onclick="switchView('exportar',this)">📤 Exportar Censo</button>
+      <button class="sb-item" onclick="switchView('link',this)">🔗 Link de Matrícula</button>
+    </nav>
+    <div class="sb-footer">
+      <button class="btn btn-outline btn-sm w-full" style="color:rgba(255,255,255,0.4);border-color:rgba(255,255,255,0.15)" onclick="doLogout()">🚪 Sair</button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div class="topbar-title" id="topbarTitle">Dashboard</div>
+      <div style="display:flex;gap:10px;align-items:center">
+        <button class="btn btn-red btn-sm" id="btnSomentePendentes" onclick="toggleSomentePendentes()">⚠️ Ver Pendentes</button>
+        <button class="btn btn-gold btn-sm" onclick="exportCSV()">📤 Exportar CSV</button>
+      </div>
+    </div>
+    <div class="content">
+
+      <!-- DASHBOARD -->
+      <div class="view-panel active" id="panel-dashboard">
+        <div class="stat-grid" id="dashStats"></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-bottom:18px" id="dashCharts"></div>
+        <div class="card">
+          <div class="card-title">👥 Últimos cadastros <a href="#" onclick="switchView('alunos',document.querySelector('[onclick*=alunos]'));return false" style="font-size:0.78rem;color:var(--text-soft);font-weight:400">Ver todos →</a></div>
+          <div id="dashRecentList"></div>
+        </div>
+      </div>
+
+      <!-- ALUNOS -->
+      <div class="view-panel" id="panel-alunos">
+        <div class="filter-bar">
+          <input class="search-input" id="searchInput" placeholder="🔍 Buscar aluno ou CPF..." oninput="renderAlunosTable()" />
+          <button class="filter-btn active" id="fb-todos" onclick="setFilter('todos',this)">Todos</button>
+          <button class="filter-btn danger" id="fb-pendente" onclick="setFilter('pendente',this)">⚠️ Pendentes</button>
+          <button class="filter-btn" id="fb-completo" onclick="setFilter('completo',this)">✅ Completos</button>
+        </div>
+        <div class="card">
+          <div class="card-title">
+            <span>Lista de Alunos <span class="badge badge-navy" id="alunoCount">0</span></span>
+          </div>
+          <div class="table-wrap" id="alunosTableWrap"></div>
+        </div>
+      </div>
+
+      <!-- SCANNER -->
+      <div class="view-panel" id="panel-scanner">
+        <div class="card">
+          <div class="card-title">🔍 Scanner de Inconsistências
+            <button class="btn btn-navy btn-sm" onclick="runScanner()">▶ Executar Scan</button>
+          </div>
+          <p style="font-size:0.85rem;color:var(--text-soft);margin-bottom:20px">Detecta problemas que causariam rejeição no sistema do MEC.</p>
+          <div id="scannerResults"><div class="empty"><span class="empty-icon">🔍</span><p>Clique em "Executar Scan" para analisar os dados</p></div></div>
+        </div>
+      </div>
+
+      <!-- EXPORTAR -->
+      <div class="view-panel" id="panel-exportar">
+        <div class="card" style="max-width:560px">
+          <div class="card-title">📤 Exportar para o Censo</div>
+          <p style="font-size:0.85rem;color:var(--text-soft);margin-bottom:20px;line-height:1.7">Gera um arquivo CSV com as colunas no padrão exato do <strong>Educacenso/MEC</strong>.</p>
+
+          <div style="background:var(--gold-pale);border:1px solid rgba(201,168,76,0.3);border-radius:var(--radius-sm);padding:16px;margin-bottom:20px">
+            <div style="font-size:0.72rem;font-weight:700;color:var(--gold);text-transform:uppercase;letter-spacing:0.8px;margin-bottom:10px">Colunas exportadas (ordem MEC)</div>
+            <div style="font-family:monospace;font-size:0.75rem;color:var(--text-mid);line-height:1.8">
+              NOME_ALUNO · CPF_ALUNO · DATA_NASCIMENTO · COD_COR_RACA · COD_SEXO · POSSUI_DEFICIENCIA · TIPOS_DEFICIENCIA · NIS · USO_TRANSPORTE · NOME_RESPONSAVEL · CEP · ZONA
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Filtrar por status</label>
+            <select class="form-input" id="exportFilter">
+              <option value="all">Todos os alunos</option>
+              <option value="completo">Somente completos ✅</option>
+              <option value="pendente">Somente pendentes ⚠️</option>
+            </select>
+          </div>
+
+          <div id="exportStats" style="margin-bottom:18px"></div>
+
+          <button class="btn btn-navy w-full" onclick="exportCSV()" style="margin-bottom:10px">📥 Baixar CSV — Padrão Educacenso</button>
+          <button class="btn btn-outline w-full" onclick="exportCSV('xlsx')">📊 Baixar Excel (.xlsx)</button>
+        </div>
+      </div>
+
+      <!-- LINK -->
+      <div class="view-panel" id="panel-link">
+        <div class="card" style="max-width:580px">
+          <div class="card-title">🔗 Link de Matrícula</div>
+          <p style="font-size:0.85rem;color:var(--text-soft);margin-bottom:18px">Compartilhe este link com os pais para que preencham os dados online.</p>
+          <div class="link-box" style="margin-bottom:18px">
+            <span>🔗</span>
+            <span class="link-url" id="matriculaLink">—</span>
+            <button class="btn btn-navy btn-sm" onclick="copyLink()">📋 Copiar</button>
+          </div>
+          <div style="background:rgba(13,27,62,0.04);border-radius:var(--radius-sm);padding:16px;font-size:0.82rem;color:var(--text-mid);line-height:1.7">
+            <strong>💡 Como usar:</strong><br>
+            Envie este link pelo WhatsApp, e-mail ou imprima um QR Code. Os pais preenchem pelo celular e os dados aparecem aqui automaticamente.
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- MODAL ALUNO -->
+<div class="modal-overlay" id="alunoModal">
+  <div class="modal">
+    <div class="modal-head">
+      <div class="modal-title" id="alunoModalTitle">Detalhes do Aluno</div>
+      <button class="modal-close" onclick="closeModal('alunoModal')">✕</button>
+    </div>
+    <div id="alunoModalBody"></div>
+    <div class="modal-footer">
+      <button class="btn btn-red btn-sm" id="btnDeleteAluno" onclick="deleteAluno()">🗑 Excluir</button>
+      <button class="btn btn-outline" onclick="closeModal('alunoModal')">Fechar</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-wrap" id="toastWrap"></div>
+
+<script>
+const SUPA_URL = 'https://xizinjddzgqdydzfgqgs.supabase.co';
+const SUPA_KEY = 'sb_publishable_bJ4RYy44n2EbLyuGcrQ-4A_JOBoAnTE';
+const SB_H = { 'Content-Type':'application/json', 'apikey': SUPA_KEY, 'Authorization':'Bearer '+SUPA_KEY };
+
+const RACAS = {1:'Branca',2:'Preta',3:'Parda',4:'Amarela',5:'Indígena'};
+const SEXOS = {1:'Masculino',2:'Feminino'};
+
+let escolaData = null;
+let alunos = [];
+let currentFilter = 'todos';
+let somentePendentes = false;
+let deleteAlunoId = null;
+
+// ── LOGIN ──
+async function doLogin() {
+  const escolaId = document.getElementById('loginEscola').value.trim();
+  const senha = document.getElementById('loginSenha').value;
+  if (!escolaId || !senha) { showToast('⚠️ Preencha todos os campos','warning'); return; }
+
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_escolas?id=eq.${escolaId}`, { headers: SB_H });
+    const rows = r.ok ? await r.json() : [];
+    if (!rows.length) { document.getElementById('loginError').textContent='Escola não encontrada.'; document.getElementById('loginError').classList.remove('hidden'); return; }
+    const escola = rows[0];
+    if (escola.senha !== senha) { document.getElementById('loginError').textContent='Senha incorreta.'; document.getElementById('loginError').classList.remove('hidden'); return; }
+
+    // Check assinatura
+    const ra = await fetch(`${SUPA_URL}/rest/v1/censo_assinaturas?escola_id=eq.${escolaId}&order=created_at.desc&limit=1`, { headers: SB_H });
+    const assinaturas = ra.ok ? await ra.json() : [];
+    if (assinaturas[0]?.status === 'inativo') {
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('blockedScreen').classList.remove('hidden');
+      return;
+    }
+
+    escolaData = escola;
+    document.getElementById('loginScreen').classList.add('hidden');
+    document.getElementById('shell').classList.remove('hidden');
+    document.getElementById('sbEscolaNome').textContent = escola.nome;
+    document.getElementById('sbEscolaCidade').textContent = escola.cidade || '';
+    document.getElementById('loginError').classList.add('hidden');
+    document.getElementById('loginSenha').value = '';
+
+    await loadAlunos();
+    renderDashboard();
+    updateLink();
+  } catch(e) { showToast('❌ Erro de conexão','error'); }
+}
+
+function doLogout() {
+  escolaData = null; alunos = [];
+  document.getElementById('shell').classList.add('hidden');
+  document.getElementById('loginScreen').classList.remove('hidden');
+}
+
+// ── LOAD ──
+async function loadAlunos() {
+  try {
+    const r = await fetch(`${SUPA_URL}/rest/v1/censo_alunos?escola_id=eq.${escolaData.id}&order=created_at.desc`, { headers: SB_H });
+    alunos = r.ok ? await r.json() : [];
+    updateBadges();
+  } catch(e) { showToast('⚠️ Erro ao carregar alunos','warning'); }
+}
+
+function updateBadges() {
+  const pend = alunos.filter(a=>a.status_censo==='pendente').length;
+  const b = document.getElementById('navPendBadge');
+  b.textContent = pend; b.classList.toggle('hidden', pend===0);
+}
+
+// ── NAV ──
+function switchView(v, btn) {
+  document.querySelectorAll('.view-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.sb-item').forEach(b=>b.classList.remove('active'));
+  document.getElementById('panel-'+v).classList.add('active');
+  if (btn) btn.classList.add('active');
+  document.getElementById('topbarTitle').textContent = {dashboard:'Dashboard',alunos:'Alunos',scanner:'Scanner de Erros',exportar:'Exportar Censo',link:'Link de Matrícula'}[v]||v;
+  const r = {dashboard:renderDashboard, alunos:renderAlunosTable, exportar:renderExportStats};
+  if (r[v]) r[v]();
+}
+
+// ── DASHBOARD ──
+function renderDashboard() {
+  const total = alunos.length;
+  const completos = alunos.filter(a=>a.status_censo==='completo').length;
+  const pendentes = alunos.filter(a=>a.status_censo==='pendente').length;
+  const pcds = alunos.filter(a=>a.pcd).length;
+  const transporte = alunos.filter(a=>a.uso_transporte).length;
+  const pct = total ? Math.round(completos/total*100) : 0;
+
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card"><div class="stat-accent" style="background:linear-gradient(90deg,var(--navy),var(--navy3))"></div><div class="stat-icon">👥</div><div class="stat-value">${total}</div><div class="stat-label">Total de alunos</div></div>
+    <div class="stat-card"><div class="stat-accent" style="background:linear-gradient(90deg,var(--success),#2ecc71)"></div><div class="stat-icon">✅</div><div class="stat-value" style="color:var(--success)">${completos}</div><div class="stat-label">Dados completos</div></div>
+    <div class="stat-card"><div class="stat-accent" style="background:linear-gradient(90deg,var(--warning),#f39c12)"></div><div class="stat-icon">⚠️</div><div class="stat-value" style="color:var(--warning)">${pendentes}</div><div class="stat-label">Pendentes</div></div>
+    <div class="stat-card"><div class="stat-accent" style="background:linear-gradient(90deg,var(--gold),var(--gold-light))"></div><div class="stat-icon">📊</div><div class="stat-value" style="color:var(--gold)">${pct}%</div><div class="stat-label">Censo completo</div></div>`;
+
+  const racaCount = {};
+  alunos.forEach(a=>{if(a.cor_raca)racaCount[RACAS[a.cor_raca]]=(racaCount[RACAS[a.cor_raca]]||0)+1;});
+  const maxR = Math.max(1,...Object.values(racaCount));
+  const pieData = [
+    {label:'Com PcD',val:pcds,total,color:'var(--navy)'},
+    {label:'Transporte',val:transporte,total,color:'var(--gold)'},
+    {label:'Censo OK',val:completos,total,color:'var(--success)'},
+    {label:'Pendentes',val:pendentes,total,color:'var(--warning)'},
+  ];
+
+  document.getElementById('dashCharts').innerHTML=`
+    <div class="card"><div class="card-title">📊 Distribuição Cor/Raça</div><div class="chart-bars">${Object.entries(racaCount).map(([n,c])=>`<div class="chart-row"><div class="chart-label">${n}</div><div class="chart-track"><div class="chart-fill" style="width:${Math.round(c/maxR*100)}%;background:linear-gradient(90deg,var(--navy),var(--navy3))">${c}</div></div><div class="chart-val">${c} aluno(s)</div></div>`).join('')||'<p style="color:var(--text-soft);font-size:0.85rem">Sem dados</p>'}</div></div>
+    <div class="card"><div class="card-title">📈 Indicadores</div><div class="chart-bars">${pieData.map(d=>{const p=d.total?Math.round(d.val/d.total*100):0;return`<div class="chart-row"><div class="chart-label">${d.label}</div><div class="chart-track"><div class="chart-fill" style="width:${p}%;background:${d.color}">${p}%</div></div><div class="chart-val">${d.val}/${d.total}</div></div>`;}).join('')}</div></div>`;
+
+  const recentes = alunos.slice(0,8);
+  document.getElementById('dashRecentList').innerHTML = recentes.length===0
+    ? '<div class="empty"><span class="empty-icon">👥</span><p>Nenhum aluno cadastrado ainda</p></div>'
+    : `<div class="table-wrap"><table class="ns-table"><thead><tr><th>Aluno</th><th>Status Censo</th><th>CPF</th><th>Cor/Raça</th></tr></thead><tbody>${recentes.map(alunoRow).join('')}</tbody></table></div>`;
+}
+
+function alunoRow(a) {
+  const cpf = a.cpf ? formatCPF(a.cpf) : '<span style="color:var(--warning);font-size:0.75rem">⚠️ Pendente</span>';
+  return `<tr style="cursor:pointer" onclick="openAlunoModal('${a.id}')">
+    <td><strong>${a.nome_completo||'—'}</strong><div style="font-size:0.72rem;color:var(--text-soft)">${a.nome_responsavel||''}</div></td>
+    <td><span class="sdot ${a.status_censo||'pendente'}">${a.status_censo==='completo'?'Completo':'Pendente'}</span></td>
+    <td style="font-family:monospace;font-size:0.82rem">${cpf}</td>
+    <td>${RACAS[a.cor_raca]||'<span style="color:var(--warning);font-size:0.75rem">⚠️ Pendente</span>'}</td>
+  </tr>`;
+}
+
+// ── ALUNOS TABLE ──
+function setFilter(f, btn) {
+  currentFilter = f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderAlunosTable();
+}
+
+function toggleSomentePendentes() {
+  somentePendentes = !somentePendentes;
+  switchView('alunos', document.querySelector('[onclick*=alunos]'));
+}
+
+function renderAlunosTable() {
+  const q = (document.getElementById('searchInput')?.value||'').toLowerCase();
+  let list = alunos;
+  if (currentFilter !== 'todos') list = list.filter(a=>a.status_censo===currentFilter);
+  if (somentePendentes) list = list.filter(a=>a.status_censo==='pendente');
+  if (q) list = list.filter(a=>(a.nome_completo||'').toLowerCase().includes(q)||(a.cpf||'').includes(q)||(a.nome_responsavel||'').toLowerCase().includes(q));
+
+  document.getElementById('alunoCount').textContent = list.length;
+  document.getElementById('alunosTableWrap').innerHTML = list.length===0
+    ? '<div class="empty"><span class="empty-icon">👥</span><p>Nenhum aluno encontrado</p></div>'
+    : `<table class="ns-table"><thead><tr><th>Nome</th><th>Status</th><th>CPF</th><th>Cor/Raça</th><th>PcD</th><th>Transporte</th><th>Responsável</th></tr></thead><tbody>${list.map(alunoRow).join('')}</tbody></table>`;
+}
+
+// ── ALUNO MODAL ──
+function openAlunoModal(id) {
+  const a = alunos.find(x=>x.id===id); if(!a) return;
+  deleteAlunoId = id;
+  document.getElementById('alunoModalTitle').textContent = a.nome_completo||'Aluno';
+  const rows = [
+    ['Nome completo', a.nome_completo||'—'],
+    ['Data nascimento', a.data_nascimento ? fmtDate(a.data_nascimento) : '—'],
+    ['Sexo', SEXOS[a.sexo]||'—'],
+    ['CPF', a.cpf ? formatCPF(a.cpf) : '⚠️ Não informado'],
+    ['NIS', a.nis_bolsa_familia||'—'],
+    ['Cor/Raça', RACAS[a.cor_raca]||'⚠️ Não informado'],
+    ['PcD', a.pcd ? '✅ Sim' : 'Não'],
+    ['Tipo deficiência', a.tipo_deficiencia ? (Array.isArray(a.tipo_deficiencia) ? a.tipo_deficiencia.join(', ') : JSON.parse(a.tipo_deficiencia).join(', ')) : '—'],
+    ['Uso transporte', a.uso_transporte ? '✅ Sim' : 'Não'],
+    ['Responsável', a.nome_responsavel||'—'],
+    ['Telefone resp.', a.telefone_responsavel||'—'],
+    ['CEP', a.cep||'—'],
+    ['Zona', a.zona||'—'],
+    ['Status Censo', a.status_censo==='completo'?'✅ Completo':'⚠️ Pendente'],
+    ['Cadastrado em', a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR') : '—'],
+  ];
+  document.getElementById('alunoModalBody').innerHTML =
+    `<div style="display:grid;grid-template-columns:1fr 1fr;gap:0">${rows.map(([k,v])=>`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:0.65rem;color:var(--text-soft);text-transform:uppercase;font-weight:700;margin-bottom:2px">${k}</div><div style="font-size:0.85rem;font-weight:600">${v}</div></div>`).join('')}</div>`;
+  openModal('alunoModal');
+}
+
+async function deleteAluno() {
+  if (!confirm('Excluir este aluno?')) return;
+  try {
+    await fetch(`${SUPA_URL}/rest/v1/censo_alunos?id=eq.${deleteAlunoId}`, { method:'DELETE', headers:SB_H });
+    alunos = alunos.filter(a=>a.id!==deleteAlunoId);
+    closeModal('alunoModal'); renderAlunosTable(); renderDashboard(); updateBadges();
+    showToast('🗑 Aluno excluído','warning');
+  } catch(e) { showToast('❌ Erro ao excluir','error'); }
+}
+
+// ── SCANNER ──
+function runScanner() {
+  const erros = [];
+  const cpfs = {};
+
+  alunos.forEach(a => {
+    const nome = a.nome_completo||'';
+    if (nome && nome !== nome.toUpperCase()) erros.push({ icon:'⚠️', msg:`Nome em letras minúsculas: <strong>${nome}</strong>`, sub:'O MEC exige nomes em MAIÚSCULAS' });
+    if (a.cpf && a.cpf.length !== 11) erros.push({ icon:'❌', msg:`CPF inválido para: <strong>${nome}</strong>`, sub:`CPF "${a.cpf}" não tem 11 dígitos` });
+    if (a.cpf) { cpfs[a.cpf] = (cpfs[a.cpf]||[]).concat(nome); }
+    if (!a.cor_raca) erros.push({ icon:'⚠️', msg:`Cor/Raça não informada: <strong>${nome}</strong>`, sub:'Campo obrigatório pelo MEC' });
+    if (!a.data_nascimento) erros.push({ icon:'⚠️', msg:`Data de nascimento ausente: <strong>${nome}</strong>`, sub:'Campo obrigatório' });
+  });
+
+  Object.entries(cpfs).forEach(([cpf,nomes]) => {
+    if (nomes.length > 1) erros.push({ icon:'🚨', msg:`CPF duplicado: <strong>${formatCPF(cpf)}</strong>`, sub:`Usado por: ${nomes.join(', ')}` });
+  });
+
+  if (erros.length === 0) {
+    document.getElementById('scannerResults').innerHTML=`<div class="empty"><span class="empty-icon">✅</span><p style="color:var(--success);font-weight:700">Nenhuma inconsistência encontrada!</p><p>Seus dados estão prontos para o Censo.</p></div>`;
+  } else {
+    document.getElementById('scannerResults').innerHTML=`<div style="margin-bottom:14px"><span class="badge badge-red">${erros.length} problema(s) encontrado(s)</span></div>`+erros.map(e=>`<div class="scanner-item"><div class="scanner-icon">${e.icon}</div><div><div class="scanner-msg">${e.msg}</div><div class="scanner-sub">${e.sub}</div></div></div>`).join('');
+  }
+  showToast(`🔍 Scan concluído: ${erros.length} problema(s)`, erros.length?'warning':'success');
+}
+
+// ── EXPORT ──
+function renderExportStats() {
+  const total = alunos.length;
+  const completos = alunos.filter(a=>a.status_censo==='completo').length;
+  document.getElementById('exportStats').innerHTML=`<div style="display:flex;gap:14px;flex-wrap:wrap"><span class="badge badge-navy">Total: ${total}</span><span class="badge badge-green">Completos: ${completos}</span><span class="badge badge-red" style="background:rgba(192,57,43,0.1);color:var(--error)">Pendentes: ${total-completos}</span></div>`;
+}
+
+function exportCSV() {
+  const filter = document.getElementById('exportFilter')?.value || 'all';
+  let list = alunos;
+  if (filter === 'completo') list = alunos.filter(a=>a.status_censo==='completo');
+  if (filter === 'pendente') list = alunos.filter(a=>a.status_censo==='pendente');
+
+  const headers = ['NOME_ALUNO','CPF_ALUNO','DATA_NASCIMENTO','COD_COR_RACA','COD_SEXO','POSSUI_DEFICIENCIA','TIPOS_DEFICIENCIA','NIS','USO_TRANSPORTE','NOME_RESPONSAVEL','CEP','ZONA','STATUS_CENSO'];
+  const rows = list.map(a => {
+    const defs = a.tipo_deficiencia ? (Array.isArray(a.tipo_deficiencia) ? a.tipo_deficiencia : JSON.parse(a.tipo_deficiencia)) : [];
+    return [
+      a.nome_completo||'',
+      a.cpf||'',
+      a.data_nascimento ? fmtDate(a.data_nascimento) : '',
+      a.cor_raca||'',
+      a.sexo||'',
+      a.pcd ? 1 : 0,
+      defs.join('|'),
+      a.nis_bolsa_familia||'',
+      a.uso_transporte ? 1 : 0,
+      a.nome_responsavel||'',
+      a.cep||'',
+      a.zona||'',
+      a.status_censo||'',
+    ].map(v => `"${String(v).replace(/"/g,'""')}"`).join(',');
+  });
+
+  const csv = '\uFEFF' + [headers.join(','), ...rows].join('\n');
+  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `censo_${escolaData?.nome||'escola'}_${new Date().toISOString().split('T')[0]}.csv`;
+  a.click(); URL.revokeObjectURL(url);
+  showToast(`📥 CSV exportado! ${list.length} aluno(s)`,'success');
+}
+
+// ── LINK ──
+function updateLink() {
+  const base = window.location.href.replace('censo-painel.html','censo-matricula.html');
+  const link = `${base}?escola=${escolaData?.id||''}`;
+  document.getElementById('matriculaLink').textContent = link;
+}
+function copyLink() {
+  const t = document.getElementById('matriculaLink').textContent;
+  navigator.clipboard.writeText(t).then(()=>showToast('📋 Link copiado!','success'));
+}
+
+// ── UTILS ──
+function formatCPF(v) { return String(v).replace(/(\d{3})(\d{3})(\d{3})(\d{2})/,'$1.$2.$3-$4'); }
+function fmtDate(d) { const [y,m,day]=String(d).split('-'); return `${day}/${m}/${y}`; }
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{if(e.target===o)o.classList.remove('open');}));
+function showToast(msg,type=''){
+  const t=document.createElement('div');t.className=`toast ${type}`;t.innerHTML=`<span>${msg}</span>`;
+  document.getElementById('toastWrap').appendChild(t);
+  setTimeout(()=>{t.style.animation='toastOut 0.3s ease forwards';setTimeout(()=>t.remove(),300);},4000);
+}
+</script>
+</body>
+</html>
